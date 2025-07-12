@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Employee Directory</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    .container {
+      flex: 3;
+      background-color: rgb(226, 228, 228);
+
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      display: flex;
+      width: 100%;
+    }
+
+    .search-bar {
+      margin-top: 10px;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 20px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .search-bar input {
+      margin: 30px;
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .search-bar button {
+      margin: 30px;
+      width: 80px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+        padding: 10px;
+      background-color: white;
+    }
+
+    .controls select {
+      padding: 5px;
+    }
+
+    .add-employee {
+      background-color: green;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .employee-cards {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      background-color: rgb(226, 228, 228);
+
+
+    }
+
+    .employee-card {
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border: #333 solid 1px;
+      border-radius: 12.5px;;
+      padding: 5px;
+      margin: 2px;
+      flex: 1 1 calc(33.333% - 10px);
+      max-width: 200px;
+
+      display: flex;
+      flex-direction: column;
+   
+    }
+
+    .card-buttons {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 10px;
+    }
+
+    .edit {
+      background-color: rgb(226, 228, 228);
+      font-family: 'roboto', sans-serif;
+      color: rgb(4, 4, 4);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    .delete {
+      background-color: rgb(226, 228, 228);
+      color: rgb(10, 7, 7);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    .footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .right-panel {
+      flex: 1;
+      background-color: #f0f0f0;
+      padding: 20px;
+      border-left: 2px solid #ccc;
+      display: none;
+    }
+
+    .right-panel.show {
+      display: block;
+      animation: blink 0.5s ease-in-out 3;
+    }
+
+    
+
+    .right-panel h3 {
+      margin-top: 0;
+    }
+
+    .right-panel label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    .right-panel input {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .right-panel .buttons {
+      margin-top: 15px;
+    }
+
+    .right-panel .buttons button {
+      padding: 8px 12px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="search-bar">
+        <h1>Employee Directory</h1>
+        <input type="text" id="searchInput" placeholder="Search by name or email" />
+        <button onclick="toggleFilterPanel()">Filter</button>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div>
+        <label for="sort">Sort:</label>
+        <select id="sort" onchange="filterEmployees()">
+          <option value="">--Select--</option>
+          <option value="name">Name</option>
+          <option value="email">Email</option>
+        </select>
+      </div>
+      <div>
+        <label for="show">Show:</label>
+        <select id="show" onchange="filterEmployees()">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+        </select>
+      </div>
+      <button class="add-employee" onclick="window.location.href='structure.html'">Add Employee</button>
+    </div>
+
+    <div class="employee-cards" id="employeeCards"></div>
+
+    <div class ="footer">
+      <p>&copy; 2025 Employee Directory App. All rights reserved.</p>
+    </div>
+  </div>
+
+  <!-- Hidden filter panel shown by button -->
+  <div class="right-panel" id="rightPanel">
+    <h3>Filter Employees</h3>
+    <label>First Name:</label>
+    <input type="text" id="filterName" />
+
+    <label>Department:</label>
+    <input type="text" id="filterDept" />
+
+    <label>Role:</label>
+    <input type="text" id="filterRole" />
+
+    <div class="buttons">
+      <button onclick="applyFilters()">Apply</button>
+      <button onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const employees = [
+      { name: "Alice Johnson", email: "alice@example.com", department: "HR", role: "Manager" },
+      { name: "Bob Smith", email: "bob@example.com", department: "Engineering", role: "Developer" },
+      { name: "Charlie Brown", email: "charlie@example.com", department: "Design", role: "UI/UX" },
+      { name: "Diana Prince", email: "diana@example.com", department: "HR", role: "Recruiter" }
+    ];
+
+    let filteredEmployees = [...employees];
+
+    function renderEmployees() {
+      const container = document.getElementById("employeeCards");
+      const showCount = parseInt(document.getElementById("show").value);
+      container.innerHTML = "";
+
+      filteredEmployees.slice(0, showCount).forEach((emp, index) => {
+        const card = document.createElement("div");
+        card.className = "employee-card";
+        card.innerHTML = `
+          <h2>${emp.name}</h2>
+          <p>${emp.email}</p>
+          <p><strong>Dept:</strong> ${emp.department}</p>
+          <p><strong>Role:</strong> ${emp.role}</p>
+          <div class="card-buttons">
+            <button class="edit" onclick="editEmployee(${index})">Edit</button>
+            <button class="delete" onclick="deleteEmployee(${index})">Delete</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterEmployees() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const sortBy = document.getElementById("sort").value;
+
+      filteredEmployees = employees.filter(
+        (emp) =>
+          emp.name.toLowerCase().includes(query) ||
+          emp.email.toLowerCase().includes(query)
+      );
+
+      if (sortBy === "name") {
+        filteredEmployees.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortBy === "email") {
+        filteredEmployees.sort((a, b) => a.email.localeCompare(b.email));
+      }
+
+      renderEmployees();
+    }
+
+    function applyFilters() {
+      const nameVal = document.getElementById("filterName").value.toLowerCase();
+      const deptVal = document.getElementById("filterDept").value.toLowerCase();
+      const roleVal = document.getElementById("filterRole").value.toLowerCase();
+
+      filteredEmployees = employees.filter((emp) => {
+        return (
+          emp.name.toLowerCase().includes(nameVal) &&
+          emp.department.toLowerCase().includes(deptVal) &&
+          emp.role.toLowerCase().includes(roleVal)
+        );
+      });
+
+      renderEmployees();
+    }
+
+    function resetFilters() {
+      document.getElementById("filterName").value = "";
+      document.getElementById("filterDept").value = "";
+      document.getElementById("filterRole").value = "";
+      filteredEmployees = [...employees];
+      renderEmployees();
+    }
+
+    function toggleFilterPanel() {
+      const panel = document.getElementById("rightPanel");
+      panel.classList.add("show");
+
+      // Remove and re-trigger blink animation
+      panel.style.animation = 'none';
+      void panel.offsetWidth; // trigger reflow
+      panel.style.animation = '';
+      panel.classList.add("show");
+    }
+
+    function editEmployee(index) {
+      const emp = filteredEmployees[index];
+      const newName = prompt("Edit name:", emp.name);
+      const newEmail = prompt("Edit email:", emp.email);
+      const newDept = prompt("Edit department:", emp.department);
+      const newRole = prompt("Edit role:", emp.role);
+
+      const realIndex = employees.findIndex(
+        (e) => e.name === emp.name && e.email === emp.email
+      );
+
+      if (realIndex !== -1 && newName && newEmail && newDept && newRole) {
+        employees[realIndex] = {
+          name: newName,
+          email: newEmail,
+          department: newDept,
+          role: newRole,
+        };
+        filterEmployees();
+      }
+    }
+
+    function deleteEmployee(index) {
+      const emp = filteredEmployees[index];
+      const confirmed = confirm(`Are you sure to delete ${emp.name}?`);
+      if (confirmed) {
+        const realIndex = employees.findIndex(
+          (e) => e.name === emp.name && e.email === emp.email
+        );
+        if (realIndex !== -1) {
+          employees.splice(realIndex, 1);
+          filterEmployees();
+        }
+      }
+    }
+
+    // Initial render
+    filterEmployees();
+  </script>
+</body>
+</html>
